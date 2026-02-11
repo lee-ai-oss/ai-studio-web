@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiPost } from "@/lib/api";
-import { setToken } from "@/lib/auth";
 
 export default function LoginPage() {
   const [pw, setPw] = useState("");
@@ -15,8 +14,8 @@ export default function LoginPage() {
     setErr("");
     setLoading(true);
     try {
+      // ✅ 서버가 쿠키를 발급함 (비밀번호 저장 X)
       await apiPost("/api/auth-check", {}, pw);
-      setToken(pw);
       router.replace("/");
     } catch (e: any) {
       setErr(e?.message || "로그인 실패");
