@@ -1,25 +1,24 @@
 import { NextResponse } from "next/server";
 
-export const runtime = "nodejs";
-
 export async function POST(req: Request) {
-  const localPw = process.env.APP_PASSWORD_LOCAL || "";
-  const auth = req.headers.get("authorization") || "";
-  const token = auth.toLowerCase().startsWith("bearer ") ? auth.slice(7) : "";
+  const authHeader = req.headers.get("authorization") || "";
+  const inputPassword = authHeader.replace("Bearer ", "");
 
-  if (!localPw) {
+  const correctPassword = process.env.APP_PASSWORD_LOCAL;
+
+  if (!correctPassword) {
     return NextResponse.json(
-      { ok: false, error: { message: "APP_PASSWORD_LOCAL is not set in .env.local" } },
+      { message: "서버 설정 오류" },
       { status: 500 }
     );
   }
 
-  if (!token || token !== localPw) {
+  if (inputPassword !== correctPassword) {
     return NextResponse.json(
-      { ok: false, error: { message: "Invalid password (local mode)" } },
+      { message: "비밀번호가 올바르지 않습니다." },
       { status: 401 }
     );
   }
 
-  return NextResponse.json({ ok: true, user: "owner-local" }, { status: 200 });
+  return NextResponse.json({ ok: true });
 }
