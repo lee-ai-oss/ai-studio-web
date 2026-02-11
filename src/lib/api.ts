@@ -30,6 +30,7 @@ export async function apiPost(path: string, body: unknown, token?: string) {
       ...(token ? { authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify(body ?? {}),
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -37,3 +38,4 @@ export async function apiPost(path: string, body: unknown, token?: string) {
   if (!res.ok) throw new Error(data?.error?.message || `HTTP ${res.status}`);
   return data;
 }
+
