@@ -15,7 +15,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       // ✅ 서버가 쿠키를 발급함 (비밀번호 저장 X)
-      await apiPost("/api/auth-check", {}, pw);
+      await apiPost("/api/auth/login", { password: pw });
       router.replace("/");
     } catch (e: any) {
       setErr(e?.message || "로그인 실패");
@@ -51,3 +51,4 @@ export default function LoginPage() {
     </main>
   );
 }
+
