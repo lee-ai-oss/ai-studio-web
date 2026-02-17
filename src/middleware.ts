@@ -4,28 +4,49 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // 로그인/정적/이미지/API 일부는 예외
+  // 로그인/인증 API/정적 파일은 예외
   if (
     pathname.startsWith("/login") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico")
   ) {
-    return NextResponse.next();
+    const res = NextResponse.next();
+
+    // ⭐ 쿠키 보이는지 확인용 헤더 추가
+    res.headers.set(
+      "x-as-session",
+      req.cookies.get("as_session") ? "1" : "0"
+    );
+    res.headers.set("x-path", pathname);
+
+    return res;
   }
 
-  // 쿠키 없으면 로그인으로
   const session = req.cookies.get("as_session")?.value;
+
   if (!session) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
-    return NextResponse.redirect(url);
+
+    const res = NextResponse.redirect(url);
+
+    // ⭐ 쿠키 없을 때도 헤더 표시
+    res.headers.set("x-as-session", "0");
+    res.headers.set("x-path", pathname);
+
+    return res;
   }
 
-  return NextResponse.next();
+  const res = NextResponse.next();
+
+  // ⭐ 쿠키 있을 때 표시
+  res.headers.set("x-as-session", "1");
+  res.headers.set("x-path", pathname);
+
+  return res;
 }
 
-// 어떤 경로에 적용할지
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
